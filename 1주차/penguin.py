@@ -24,4 +24,4 @@ def total(df, s):
 
 
 # 값을 확인하기 위한 코드입니다. 값을 변경해가며 테스트해 보세요!
-print(total(df, 30))
+print(total(df, 50))
