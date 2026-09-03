@@ -80,3 +80,16 @@ print(f'X size : {X.size}, 결측 개수 : {int(X.isna().sum().sum())}')
 check('X 생성', X is not None)
 check('X 크기 1567 x 446', X is not None and X.shape == (1567, 446), None if X is None else X.shape)
 check('결측 0개', X is not None and int(X.isna().sum().sum()) == 0)
+
+# TODO 5-1: 남은 신호의 메타데이터만 추출 (힌트: .isin())
+meta_keep = meta[meta['signal_id'].isin(keep_cols)]
+
+# TODO 5-2: 모듈별 개수 세기 (힌트: value_counts)
+by_module = meta_keep['module_kr'].value_counts()
+
+# TODO 5-3: 막대그래프. 제목과 축 이름을 꼭 넣으세요
+by_module.plot.bar(title='모듈별 신호 개수', xlabel='모듈', ylabel='신호 개수', rot=0)
+
+check('meta_keep 446행', meta_keep is not None and len(meta_keep) == 446, None if meta_keep is None else len(meta_keep))
+check('모듈 8종', by_module is not None and len(by_module) == 8)
+
