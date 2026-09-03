@@ -69,3 +69,14 @@ keep_cols = [col for col in sig_cols if col not in drop_cols]
 check('상수 신호 116개', const_cols is not None and len(const_cols) == 116, None if const_cols is None else len(const_cols))
 check('제거 144개', drop_cols is not None and len(drop_cols) == 144, '결측 28 + 상수 116')
 check('사용 446개', keep_cols is not None and len(keep_cols) == 446, None if keep_cols is None else len(keep_cols))
+
+# TODO 4-1: 중앙값으로 채우기
+#   힌트: X = df[keep_cols].fillna( ... .median())
+X = df[keep_cols].fillna(miss.median())
+
+# TODO 4-2: 남은 결측 개수와 X 크기 출력
+print(f'X size : {X.size}, 결측 개수 : {int(X.isna().sum().sum())}')
+
+check('X 생성', X is not None)
+check('X 크기 1567 x 446', X is not None and X.shape == (1567, 446), None if X is None else X.shape)
+check('결측 0개', X is not None and int(X.isna().sum().sum()) == 0)
