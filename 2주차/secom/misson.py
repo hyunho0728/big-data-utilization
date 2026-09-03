@@ -42,13 +42,31 @@ check('불량 104건', n_fail == 104, n_fail)
 check('불량률 6.64%', fail_rate is not None and abs(fail_rate - 6.64) < 0.05, fail_rate)
 
 # TODO 2-1: SIG_ 로 시작하는 컬럼 이름만 모으기
-sig_cols = None
+sig_cols = [col for col in meta['signal_id'] if col.startswith('SIG_')]
+#print(sig_cols)
 
 # TODO 2-2: 신호별 결측 비율 (힌트: .isna().mean())
-miss = None
+miss = df[sig_cols].isna().mean()
 
 # TODO 2-3: 결측이 많은 상위 10개 출력
-
+print(miss.sort_values(ascending=False).head(10))
 
 # TODO 2-4: 결측 50%를 넘는 신호 이름 리스트
-high_missing = None
+high_missing = miss[miss > 0.5].index.tolist()
+
+check('신호 590개', sig_cols is not None and len(sig_cols) == 590, None if sig_cols is None else len(sig_cols))
+check('결측 비율 계산', miss is not None and abs(miss.mean() - 0.0454) < 0.001)
+check('50% 초과 28개', high_missing is not None and len(high_missing) == 28, None if high_missing is None else len(high_missing))
+
+# TODO 3-1: 값이 항상 같은 신호 찾기 (힌트: .nunique())
+const_cols = None
+
+# TODO 3-2: 제거 목록 합치기 (중복 없이)
+drop_cols = None
+
+# TODO 3-3: 남는 신호
+keep_cols = None
+
+check('상수 신호 116개', const_cols is not None and len(const_cols) == 116, None if const_cols is None else len(const_cols))
+check('제거 144개', drop_cols is not None and len(drop_cols) == 144, '결측 28 + 상수 116')
+check('사용 446개', keep_cols is not None and len(keep_cols) == 446, None if keep_cols is None else len(keep_cols))
