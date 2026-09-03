@@ -94,20 +94,29 @@ check('meta_keep 446행', meta_keep is not None and len(meta_keep) == 446, None 
 check('모듈 8종', by_module is not None and len(by_module) == 8)
 
 # TODO 6-1: 불량 마스크
-is_fail = keep_cols and df['label'] == 1
+is_fail = df['label'] == 1
 
 # TODO 6-2: 그룹별 평균
-mean_fail = is_fail.mean()
-mean_pass = (~is_fail).mean()
+mean_fail = X[is_fail].mean()
+mean_pass = X[~is_fail].mean()
 
 # TODO 6-3: 효과크기 (절댓값, 큰 순서로 정렬)
-effect = ((mean_fail - mean_pass) / df[keep_cols].std()).abs().sort_values(ascending=False)
-print(effect)
+std_all = X.std().replace(0, np.nan)
+effect = ((mean_fail - mean_pass) / std_all).abs().sort_values(ascending=False)
 
 # TODO 6-4: Top 10 을 meta 와 합쳐 표로 출력
-top10 = effect.head(10).to_frame('effect').merge(meta_keep, left_index=True, right_on='signal_id').set_index('signal_id')  
-#print(top10)
+top10 = effect.head(10)
+tbl = (top10.rename('효과크기').reset_index().rename(columns={'index': 'signal_id'}).merge(meta[['signal_id', 'module_kr', 'sensor_type', 'unit']], on='signal_id', how='left'))
+tbl['효과크기'] = tbl['효과크기'].round(4)
+print(tbl.to_string(index=False))
 
+best = top10.index[0]
+fig, ax = plt.subplots(figsize=(6, 4.5))
+ax.boxplot([X.loc[~is_fail, best], X.loc[is_fail, best]], tick_labels=['양품', '불량'])
+ax.set_title('{} 값 분포 (효과크기 {:.3f})'.format(best, top10.iloc[0]))
+ax.set_ylabel('센서 값')
+plt.tight_layout()
+plt.show()
 
 # TODO 6-5: 1등 신호의 양품 vs 불량 박스플롯
 
