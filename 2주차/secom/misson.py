@@ -93,3 +93,27 @@ by_module.plot.bar(title='모듈별 신호 개수', xlabel='모듈', ylabel='신
 check('meta_keep 446행', meta_keep is not None and len(meta_keep) == 446, None if meta_keep is None else len(meta_keep))
 check('모듈 8종', by_module is not None and len(by_module) == 8)
 
+# TODO 6-1: 불량 마스크
+is_fail = keep_cols and df['label'] == 1
+
+# TODO 6-2: 그룹별 평균
+mean_fail = is_fail.mean()
+mean_pass = (~is_fail).mean()
+
+# TODO 6-3: 효과크기 (절댓값, 큰 순서로 정렬)
+effect = ((mean_fail - mean_pass) / df[keep_cols].std()).abs().sort_values(ascending=False)
+print(effect)
+
+# TODO 6-4: Top 10 을 meta 와 합쳐 표로 출력
+top10 = effect.head(10).to_frame('effect').merge(meta_keep, left_index=True, right_on='signal_id').set_index('signal_id')  
+#print(top10)
+
+
+# TODO 6-5: 1등 신호의 양품 vs 불량 박스플롯
+
+
+check('불량 104건', is_fail is not None and int(is_fail.sum()) == 104)
+check('효과크기 계산', effect is not None and len(effect.dropna()) > 400)
+check('1위 SIG_060', top10 is not None and top10.index[0] == 'SIG_060', None if top10 is None else top10.index[0])
+check('2위 SIG_104', top10 is not None and top10.index[1] == 'SIG_104')
+check('1위 효과크기 0.627', top10 is not None and abs(top10.iloc[0] - 0.6265) < 0.01)
