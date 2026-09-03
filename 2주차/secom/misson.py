@@ -110,6 +110,7 @@ tbl = (top10.rename('효과크기').reset_index().rename(columns={'index': 'sign
 tbl['효과크기'] = tbl['효과크기'].round(4)
 print(tbl.to_string(index=False))
 
+# TODO 6-5: 1등 신호의 양품 vs 불량 박스플롯
 best = top10.index[0]
 fig, ax = plt.subplots(figsize=(6, 4.5))
 ax.boxplot([X.loc[~is_fail, best], X.loc[is_fail, best]], tick_labels=['양품', '불량'])
@@ -118,11 +119,33 @@ ax.set_ylabel('센서 값')
 plt.tight_layout()
 plt.show()
 
-# TODO 6-5: 1등 신호의 양품 vs 불량 박스플롯
-
-
 check('불량 104건', is_fail is not None and int(is_fail.sum()) == 104)
 check('효과크기 계산', effect is not None and len(effect.dropna()) > 400)
 check('1위 SIG_060', top10 is not None and top10.index[0] == 'SIG_060', None if top10 is None else top10.index[0])
 check('2위 SIG_104', top10 is not None and top10.index[1] == 'SIG_104')
 check('1위 효과크기 0.627', top10 is not None and abs(top10.iloc[0] - 0.6265) < 0.01)
+
+# TODO 7-1: 월 단위 컬럼 만들기
+#   힌트: df['timestamp'].dt.to_period('M')
+#   (아래에 직접 작성하세요)
+month = df['timestamp'].dt.to_period('M').rename('month')
+df = pd.concat([df, month], axis=1)
+
+# TODO 7-2: 월별 처리량 / 불량수 / 불량률
+monthly = df.groupby('month')['label'].agg(처리량='size', 불량수='sum', 불량률='mean')
+monthly['불량률'] = (monthly['불량률'] * 100).round(2)
+print(monthly.to_string())
+
+# TODO 7-3: 월별 불량률 선그래프
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(monthly.index.astype(str), monthly['불량률'], marker='o', color='#E45756', linewidth=2)
+ax.set_title('월별 불량률 추이')
+ax.set_xlabel('월')
+ax.set_ylabel('불량률 (%)')
+ax.grid(alpha=.3)
+plt.tight_layout()
+plt.show()
+
+check('month 컬럼', df is not None and 'month' in df.columns and df['month'].notna().all())
+check('4개월 집계', monthly is not None and len(monthly) == 4, '2008년 7~10월')
+check('7월이 가장 높음', monthly is not None and monthly['불량률'].idxmax() == monthly.index[0])
